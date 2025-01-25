@@ -3,8 +3,14 @@ from fastapi import FastAPI, UploadFile
 from fastapi.responses import JSONResponse
 
 from utils import perform_ocr
+from fastapi import FastAPI
+from routes.routes import router  
+
+
 
 app = FastAPI()
+
+app.include_router(router)
 
 @app.get("/")
 async def root():
