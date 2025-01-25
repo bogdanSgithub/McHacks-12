@@ -4,6 +4,11 @@ import numpy as np
 import pytesseract
 from imutils.perspective import four_point_transform
 
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import time
+
 import json
 import re
 
@@ -89,6 +94,7 @@ def perform_ocr(img: np.ndarray):
         else:
             quantity = int(match[0])
         product_code = match[1]
+
         product = {
             "product_code": product_code,
             "quantity": quantity,
@@ -96,11 +102,51 @@ def perform_ocr(img: np.ndarray):
         }
         products.append(product)
     json_output = json.dumps(products, indent=2)
+    get_products(json.loads(json_output))
     return json_output
+
+def get_product_info(driver):
+    time.sleep(6)
+    print(driver.page_source)
+    class_name = "product-name__item product-name__item--name"
+    element = driver.find_element(By.CSS_SELECTOR, f".{class_name.replace(' ', '.')}")
+    print(element.get_attribute('outerHTML'))
+
+
+def get_products(json_objects):
+    base_url = "https://www.maxi.ca/fr/search?search-bar="
+    #url = f"https://www.maxi.ca/fr/search?search-bar={product_code}"
+    class_name = "chakra-linkbox__overlay css-1hnz6hu"
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Disable Selenium detection
+    
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    )
+    # Start the WebDriver
+    driver = webdriver.Chrome(options=chrome_options)
+    for product in json_objects:
+        try:
+            driver.get(f"{base_url}{product['product_code']}")
+            time.sleep(4)  # Adjust if needed for dynamic content
+            element = driver.find_element(By.CSS_SELECTOR, f".{class_name.replace(' ', '.')}")
+            href = element.get_attribute("href")
+            print(f"https://www.maxi.ca/{href}")
+            driver.get(f"https://www.maxi.ca/{href}")
+            product = get_product_info(driver)
+
+        except Exception as e:
+            print(f"Error: {e}")
 
 
 #img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
-'''
+
 img_path = r"C:\Users\Bogdan\Downloads\receipt_1.jpg"
 img = cv2.imread(img_path)
 
@@ -110,4 +156,3 @@ else:
     _, img_encoded = cv2.imencode('.jpg', img)  # Encode to JPG format
     img_bytes = img_encoded.tobytes()  # Convert to byte buffer
     perform_ocr(np.frombuffer(img_bytes, dtype=np.uint8))  # Ensure it's a NumPy array
-'''
