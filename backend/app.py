@@ -1,16 +1,22 @@
 import numpy as np
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, APIRouter
 from fastapi.responses import JSONResponse
-
+from fastapi.middleware.cors import CORSMiddleware
 from utils import perform_ocr
-from fastapi import FastAPI
-from routes.routes import router  
-
-
+from routes import routes
 
 app = FastAPI()
+router = APIRouter()
 
-app.include_router(router)
+app.include_router(routes.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():

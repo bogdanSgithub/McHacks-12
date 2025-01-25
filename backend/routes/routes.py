@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, APIRouter
 from sqlalchemy.orm import Session
 from db.database import get_db, create_db
-from models.models import Item
+from models.item import Item
 from schemas.schemas import ItemCreate, ItemResponse
 
 
