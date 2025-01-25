@@ -74,18 +74,15 @@ def perform_ocr(img: np.ndarray):
     options = "--psm 6"
     text = pytesseract.image_to_string(
         cv2.cvtColor(receipt, cv2.COLOR_BGR2RGB), config=options
-    )
-    print(text)
-    
+    )    
     pattern = r'(?<!\d)(?:\((\d+)\))?\s*(\d{11})(?=\s)'
 
     # Find all matches for product codes and quantities
     matches = re.findall(pattern, text)
-    print(matches)
 
-    date_pattern = r'Time:\s*(\d{2}/\d{2}/\d{2})'
+    date_pattern = r'\s\d{2}/\d{2}/\d{2}\s'
     date_match = re.search(date_pattern, text)
-    date_bought = date_match.group(1) if date_match else None
+    date_bought = date_match.group().strip() if date_match else None
 
     products = []
     for match in matches:
@@ -101,22 +98,22 @@ def perform_ocr(img: np.ndarray):
             "date_bought": date_bought
         }
         products.append(product)
-    json_output = json.dumps(products, indent=2)
-    get_products(json.loads(json_output))
-    return json_output
 
-def get_product_info(driver):
-    time.sleep(6)
-    print(driver.page_source)
-    class_name = "product-name__item product-name__item--name"
-    element = driver.find_element(By.CSS_SELECTOR, f".{class_name.replace(' ', '.')}")
-    print(element.get_attribute('outerHTML'))
+    for product in products:
+        product = get_product_info(product)
+    #final_products = []
+    #for product in products:
+    #    quantity = product.pop("quantity")
+    #    for _ in range(quantity):
+    #        final_products.append(product)
+    #    
+    #print(final_products)
+    return json.dumps(products, indent=4)
 
 
-def get_products(json_objects):
-    base_url = "https://www.maxi.ca/fr/search?search-bar="
-    #url = f"https://www.maxi.ca/fr/search?search-bar={product_code}"
-    class_name = "chakra-linkbox__overlay css-1hnz6hu"
+def get_product_info(product):
+    url = f"https://www.maxi.ca/fr/search?search-bar={product["product_code"]}"
+    #class_name = "chakra-linkbox__overlay css-1hnz6hu"
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
@@ -131,23 +128,23 @@ def get_products(json_objects):
     )
     # Start the WebDriver
     driver = webdriver.Chrome(options=chrome_options)
-    for product in json_objects:
-        try:
-            driver.get(f"{base_url}{product['product_code']}")
-            time.sleep(4)  # Adjust if needed for dynamic content
-            element = driver.find_element(By.CSS_SELECTOR, f".{class_name.replace(' ', '.')}")
-            href = element.get_attribute("href")
-            print(f"https://www.maxi.ca/{href}")
-            driver.get(f"https://www.maxi.ca/{href}")
-            product = get_product_info(driver)
+    try:
+        driver.get(url)
+        time.sleep(4)
 
-        except Exception as e:
-            print(f"Error: {e}")
+        product["name"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-heading css-6qrhwc".replace(' ', '.')}").get_attribute("innerText")
+        product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1ecdp9w".replace(' ', '.')}").get_attribute("innerText")
+        product["image"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-image css-oguq8l".replace(' ', '.')}").get_attribute("src")
+        product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1yftjin".replace(' ', '.')}").get_attribute("innerText")
+
+    except Exception as e:
+        pass
 
 
 #img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
 
-img_path = r"C:\Users\Bogdan\Downloads\receipt_1.jpg"
+#img_path = r"C:\Users\Bogdan\Downloads\receipt_1.jpg"
+'''
 img = cv2.imread(img_path)
 
 if img is None:
@@ -156,3 +153,4 @@ else:
     _, img_encoded = cv2.imencode('.jpg', img)  # Encode to JPG format
     img_bytes = img_encoded.tobytes()  # Convert to byte buffer
     perform_ocr(np.frombuffer(img_bytes, dtype=np.uint8))  # Ensure it's a NumPy array
+'''
