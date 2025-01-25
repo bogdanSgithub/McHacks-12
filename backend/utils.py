@@ -4,6 +4,9 @@ import numpy as np
 import pytesseract
 from imutils.perspective import four_point_transform
 
+import json
+import re
+
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def perform_ocr(img: np.ndarray):
@@ -67,4 +70,44 @@ def perform_ocr(img: np.ndarray):
     text = pytesseract.image_to_string(
         cv2.cvtColor(receipt, cv2.COLOR_BGR2RGB), config=options
     )
-    return text
+    print(text)
+    
+    pattern = r'(?<!\d)(?:\((\d+)\))?\s*(\d{11})(?=\s)'
+
+    # Find all matches for product codes and quantities
+    matches = re.findall(pattern, text)
+    print(matches)
+
+    date_pattern = r'Time:\s*(\d{2}/\d{2}/\d{2})'
+    date_match = re.search(date_pattern, text)
+    date_bought = date_match.group(1) if date_match else None
+
+    products = []
+    for match in matches:
+        if match[0] == "":
+            quantity = 1
+        else:
+            quantity = int(match[0])
+        product_code = match[1]
+        product = {
+            "product_code": product_code,
+            "quantity": quantity,
+            "date_bought": date_bought
+        }
+        products.append(product)
+    json_output = json.dumps(products, indent=2)
+    return json_output
+
+
+#img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
+'''
+img_path = r"C:\Users\Bogdan\Downloads\receipt_1.jpg"
+img = cv2.imread(img_path)
+
+if img is None:
+    print("Error loading image!")
+else:
+    _, img_encoded = cv2.imencode('.jpg', img)  # Encode to JPG format
+    img_bytes = img_encoded.tobytes()  # Convert to byte buffer
+    perform_ocr(np.frombuffer(img_bytes, dtype=np.uint8))  # Ensure it's a NumPy array
+'''
