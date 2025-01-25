@@ -1,0 +1,13 @@
+# schemas.py
+from pydantic import BaseModel
+
+class ItemCreate(BaseModel):
+    name: str
+    weight: int
+    expiration_date: str
+
+class ItemResponse(ItemCreate):
+    id: int
+
+    class Config:
+        orm_mode = True  
