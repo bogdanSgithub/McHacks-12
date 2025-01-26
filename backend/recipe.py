@@ -2,8 +2,6 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import requests
-import json
-import ast
 import re
 
 load_dotenv()
@@ -22,8 +20,6 @@ def get_items():
 
 def get_recipes():
     items = get_items()
-    #with open('items.json', 'r') as file:
-    #    items = json.load(file)  
 
     if client is None:
         return ""
@@ -35,7 +31,6 @@ def get_recipes():
     ]
     )
     info = completion.choices[0].message.content.split("||")
-    print(info)
     final = [
         {"recipe": info[0], "dct": info[1]},
         {"recipe": info[2], "dct": info[3]}
@@ -50,21 +45,15 @@ def extract_quantity(value):
 
 def cook_recipe(info):
     items = get_items()
-    #with open('items.json', 'r') as file:
-    #    items = json.load(file)
     if client is None:
-        return ""
-    print(info)
+        Exception("OpenAI API key not found")
     tuples = re.findall(r"\((\d+),\s*'([^']+)'\)", info)
     tuple_list = [(int(id), extract_quantity(value)) for id, value in tuples]
-    print(tuple_list)
     for key, value in tuple_list:
         for item in items:
             if item["id"] == key:
                 available_quantity = extract_quantity(item["weight"])
                 if available_quantity <= value:
-                    print(f"Deleting item {key}")
                     requests.delete(f"http://localhost:8000/items/{item["id"]}")
                 else:
-                    print(f"reducing item {key}")
                     response = requests.put(f"http://localhost:8000/items/{item["id"]}", json={"weight": f"{available_quantity - value} {item['weight'].split()[1]}"})
