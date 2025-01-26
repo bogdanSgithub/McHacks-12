@@ -2,7 +2,8 @@ import numpy as np
 from fastapi import FastAPI, UploadFile, APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from utils import perform_ocr
+from ocr_scraping import perform_ocr
+from recipe import get_recipes
 from routes import routes
 
 app = FastAPI()
@@ -20,11 +21,10 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the OCR API"}
+    return {"message": "Welcome to MyFridge"}
 
 @app.post("/ocr/")
 async def ocr_receipt(file: UploadFile):
-    # Check if the uploaded file is an image
     if file.content_type.startswith("image"):
         image_bytes = await file.read()
         img_array = np.frombuffer(image_bytes, np.uint8)
@@ -34,3 +34,6 @@ async def ocr_receipt(file: UploadFile):
     else:
         return {"error": "Uploaded file is not an image"}
 
+@app.post("/recipe/")
+async def recipes():
+    return get_recipes()
