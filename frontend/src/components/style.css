@@ -17,14 +17,14 @@ body {
 .wrapper {
   height: 700px;
   width: 450px;
-  border: 5px solid #61412D;
+  border: 5px solid #B8B8B8;
   position: relative;
   perspective: 1500px; /* Increase perspective for better depth effect */
 }
 
 /* Door styles */
 .door {
-  background-color: #61412D;
+  background: linear-gradient(145deg, #B8B8B8, #A0A0A0);
   height: 100%;
   width: 50%;
   position: absolute;
@@ -34,7 +34,7 @@ body {
   align-items: center;
   overflow: hidden;
   visibility: visible;
-  transition: transform 0.5s ease;
+  transition: transform 1s ease;
   z-index: 2; /* Doors in front of the shelves when closed */
 }
 
@@ -54,13 +54,15 @@ body {
 
 /* When hovering over the wrapper, doors will open */
 .wrapper:hover #left-door {
-  transform: rotateY(-135deg); /* Open left door */
+  transform: rotateY(-180deg); /* Open left door */
 }
 
 .wrapper:hover #right-door {
-  transform: rotateY(135deg); /* Open right door */
+  transform: rotateY(180deg); /* Open right door */
 }
-
+.wrapper:hover .door-knob {
+  opacity: 0;
+}
 /* Shelf container - hidden by default, shown when doors open */
 .shelves-container {
   position: absolute;
@@ -70,7 +72,7 @@ body {
   bottom: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: flex-start;
   padding: 10px;
   opacity: 0; /* Initially hide shelves */
   z-index: 1; /* Behind doors initially */
@@ -89,20 +91,19 @@ body {
   flex-direction: row;
   gap: 20px;
   width: 95%; /* Half width of the fridge for each shelf */
-  justify-content: center;
+  justify-content: flex-start;
+  margin-bottom: 60px;
   max-width: 500px;
 }
 
 .product {
-  background: #fff;
-  border-radius: 10px;
+  background: #FFFF;
+  border: none;
   padding: 10px;
   margin: 2px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   width: 500px;
   flex-grow: 1;
-  height: auto;
   max-width: 400px;
 }
 
@@ -110,4 +111,66 @@ body {
   width: 100%;
   height: auto;
   border-radius: 8px;
+}
+.door-knob {
+  width: 20px;
+  height: 250px;
+  background-color: #888; /* Darker gray for the knob */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* 3D effect */
+  position: absolute;
+  top: 50%; /* Position vertically in the middle of the door */
+  left: 50%; /* Position horizontally in the middle of the door */
+  transform: translate(-50%, -50%); /* Center the knob exactly */
+  z-index: 3; /* Ensure knob is in front of the door */
+}
+.hardcoded-line {
+  margin-top: 9rem; 
+  margin-bottom: 0rem;
+  border-top: 7px solid #B8B8B8;
+  background-color: red; /* Add temporary background color */
+  height: 0;
+  width: 100%;
+}
+.hardcoded-line1 {
+  margin-top: 10rem; 
+  margin-bottom: 0rem;
+  border-top: 7px solid #B8B8B8;
+  background-color: red; /* Add temporary background color */
+  height: 0;
+  width: 100%;
+}
+.hardcoded-line2 {
+  margin-top: 10rem; 
+  margin-bottom: 0rem;
+  border-top: 7px solid #B8B8B8;
+  background-color: red; /* Add temporary background color */
+  height: 0;
+  width: 100%;
+}
+.hardcoded-line3 {
+  margin: 0 auto; /* Center the line horizontally */
+  border-left: 7px solid #B8B8B8; /* Create the vertical line */
+  height: 30%; /* Set the height of the vertical line */
+  width: 0; /* No horizontal width since it's a vertical line */
+  background-color: transparent; /* Remove the temporary background color */
+}
+.rectangle {
+  width: 80px; /* Adjust width as needed */
+  height: 10px; /* Adjust height as needed */
+  background-color: #B8B8B8; /* Default rectangle color */
+  position: absolute; /* Allows you to position it anywhere */
+  top: 550px; /* Adjust top position */
+  left: 70px; /* Adjust left position */
+  border-radius: 4px; /* Optional: slightly rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Optional: subtle shadow */
+}
+.rectangle2 {
+  width: 80px; /* Adjust width as needed */
+  height: 10px; /* Adjust height as needed */
+  background-color: #B8B8B8; /* Default rectangle color */
+  position: absolute; /* Allows you to position it anywhere */
+  top: 550px; /* Adjust top position */
+  left: 290px; /* Adjust left position */
+  border-radius: 4px; /* Optional: slightly rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Optional: subtle shadow */
 }

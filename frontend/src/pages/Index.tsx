@@ -6,8 +6,9 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-white-50">
       <div className="text-center space-y-6">
+      <h1 className="text-3xl font-bold mb-2 text-black-700">MyFridge</h1>
         <h1 className="text-4xl font-bold mb-4">Food Inventory Manager</h1>
         <p className="text-xl text-gray-600 max-w-md mx-auto">
           Keep track of your food items, manage expiration dates, and monitor nutrition values.

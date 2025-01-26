@@ -8,46 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Upload, Loader2 } from "lucide-react";
 
-// Sample receipt data that would come from OCR
-/*const sampleReceipt = {
-  items: [
-    {
-      id: 4,
-      title: "Chicken Breast",
-      description: "Fresh boneless chicken breast",
-      quantity: 2,
-      pricePerUnit: 5.99,
-      nutritionValue: {
-        calories: 165,
-        protein: "31g",
-        carbs: "0g",
-        fat: "3.6g"
-      },
-      image: "/placeholder.svg",
-      expirationDate: "2024-04-19",
-      dateBought: "2024-04-13",
-      brand: "Perdue"
-    },
-    {
-      id: 5,
-      title: "Greek Yogurt",
-      description: "Plain Greek yogurt",
-      quantity: 1,
-      pricePerUnit: 4.99,
-      nutritionValue: {
-        calories: 130,
-        protein: "12g",
-        carbs: "9g",
-        fat: "0g"
-      },
-      image: "/placeholder.svg",
-      expirationDate: "2024-04-27",
-      dateBought: "2024-04-13",
-      brand: "Fage"
-    }
-  ]
-};*/
-
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -75,10 +35,11 @@ const AddProduct = () => {
   
       // Directly handle `result` as an array
       if (Array.isArray(data.result)) {
-        const itemsWithNames = data.result.map((item) => ({
+        const itemsWithProcessedWeights = data.result.map((item) => ({
           ...item,
+          weight: item.weight ? item.weight.split(",")[0].trim() : "", // Process the weight here
         }));
-        setItems(itemsWithNames);
+        setItems(itemsWithProcessedWeights);
         toast.success("Receipt processed successfully!");
       } else {
         setItems([]);
@@ -101,11 +62,20 @@ const AddProduct = () => {
   const handleDragLeave = () => {
     setIsDragging(false);
   };
+
   const updateItem = (index: number, field: string, value: string | number) => {
     setItems((prevItems) =>
-      prevItems.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
+      prevItems.map((item, i) => {
+        if (i === index) {
+          if (field === "weight" && typeof value === "string") {
+            // Split the weight value and keep only the first part
+            const [weight] = value.split(",");
+            return { ...item, [field]: weight.trim() }; // Trim to remove extra spaces
+          }
+          return { ...item, [field]: value };
+        }
+        return item;
+      })
     );
   };
 
@@ -131,54 +101,51 @@ const AddProduct = () => {
       toast.error("No items to save. Please upload a receipt first.");
       return;
     }
-  
-    // Transform data to match backend expectations
+
     const transformedItems = items.map((item) => ({
       name: item.name,
       weight: item.weight,
-      expiration_date: "2025-01-01", // Placeholder, you can replace this with actual logic
-      image: item.image,  
+      expiration_date: item.expirationDate,
+      image: item.image,
     }));
-  
+
     console.log("Transformed items:", transformedItems);
-    console.log(items);
+
     try {
-      // Assuming you only want to send the first item
       const response = await fetch("http://127.0.0.1:8000/additems/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(transformedItems), // Send just the first item (or the item you're trying to save)
+        body: JSON.stringify(transformedItems),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to save order to the database.");
       }
-  
+
       const result = await response.json();
 
       toast.success("Order saved successfully!");
       console.log("Saved order:", result);
-  
-      // Redirect to another page (e.g., dashboard or home page)
+
       navigate("/");
     } catch (error) {
       console.error("Error saving order:", error);
       toast.error("Failed to save order. Please try again.");
     }
   };
-  
-  
-  
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Add Products</h1>
+      <h1 className="text-3xl font-bold mb-8 flex justify-center items-center">
+        Add Products
+      </h1>
 
       <Card
-        className={`p-8 mb-8 border-2 border-dashed ${isDragging ? "border-primary bg-primary/10" : "border-gray-200"
-          } transition-colors`}
+        className={`p-8 mb-8 border-2 border-dashed ${
+          isDragging ? "border-primary bg-primary/10" : "border-gray-200"
+        } transition-colors`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -186,7 +153,9 @@ const AddProduct = () => {
         <div className="text-center">
           <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h3 className="text-lg font-semibold mb-2">Upload Receipt</h3>
-          <p className="text-gray-500 mb-4">Drag and drop your receipt image here</p>
+          <p className="text-gray-500 mb-4">
+            Drag and drop your receipt image here
+          </p>
           <div className="relative">
             <Input
               type="file"
@@ -212,69 +181,81 @@ const AddProduct = () => {
       </Card>
 
       {items.map((item, index) => (
-        <Card key={item.product_code || index} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Image Section */}
-            <div className="flex justify-center items-center">
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-32 h-32 object-cover rounded-lg shadow-sm"
-                />
-              ) : (
-                <div className="w-32 h-32 flex items-center justify-center bg-gray-100 text-gray-400 text-sm rounded-lg shadow-sm">
-                  No Image
-                </div>
-              )}
-            </div>
-
-            {/* Details Section */}
-            <div className="col-span-2 space-y-4">
-              <div>
-                <Label htmlFor={`title-${index}`}>Name</Label>
-                <Input
-                  id={`title-${index}`}
-                  value={item.name}
-                  onChange={(e) => updateItem(index, "name", e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor={`quantity-${index}`}>Quantity</Label>
-                  <Input
-                    id={`quantity-${index}`}
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      updateItem(index, "quantity", parseInt(e.target.value))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`brand-${index}`}>Brand</Label>
-                  <Input
-                    id={`brand-${index}`}
-                    value={item.brand}
-                    onChange={(e) => updateItem(index, "brand", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor={`expiration-${index}`}>Expiration Date</Label>
-                <Input
-                  id={`expiration-${index}`}
-                  type="date"
-                  value={item.expirationDate}
-                  onChange={(e) =>
-                    updateItem(index, "expirationDate", e.target.value)
-                  }
-                />
-              </div>
-            </div>
+  <Card key={item.product_code || index} className="p-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="flex justify-center items-center">
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.name}
+            className="w-32 h-32 object-cover rounded-lg shadow-sm"
+          />
+        ) : (
+          <div className="w-32 h-32 flex items-center justify-center bg-gray-100 text-gray-400 text-sm rounded-lg shadow-sm">
+            No Image
           </div>
-        </Card>
-      ))}
+        )}
+      </div>
+
+      <div className="col-span-2 space-y-4">
+        <div>
+          <Label htmlFor={`title-${index}`}>Name</Label>
+          <Input
+            id={`title-${index}`}
+            value={item.name}
+            onChange={(e) => updateItem(index, "name", e.target.value)}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor={`quantity-${index}`}>Quantity</Label>
+            <Input
+              id={`quantity-${index}`}
+              type="number"
+              value={item.quantity}
+              onChange={(e) =>
+                updateItem(index, "quantity", parseInt(e.target.value))
+              }
+            />
+          </div>
+          <div>
+            <Label htmlFor={`brand-${index}`}>Brand</Label>
+            <Input
+              id={`brand-${index}`}
+              value={item.brand}
+              onChange={(e) => updateItem(index, "brand", e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor={`weight-${index}`}>Weight</Label>
+            <Input
+              id={`weight-${index}`}
+              value={item.weight}
+              onChange={(e) => updateItem(index, "weight", e.target.value)}
+            />
+          </div>
+          <div>
+    <Label htmlFor={`expiration-${index}`}>Expiration Date</Label>
+    <Input
+      id={`expiration-${index}`}
+
+      value={item.expiration_date || ""}
+      onChange={(e) =>
+        updateItem(index, "expiration_date", e.target.value)
+      }
+    />
+   
+  </div>
+        </div>
+        
+      </div>
+    </div>
+  </Card>
+))}
+
+
       {items.length > 0 && (
         <div className="text-right mt-6">
           <Button onClick={handleSaveOrder} variant="default">
@@ -283,6 +264,7 @@ const AddProduct = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
+
 export default AddProduct;

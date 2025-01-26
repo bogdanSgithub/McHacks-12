@@ -3,12 +3,20 @@ import axios from "axios";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { Calendar, ShoppingBag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import '/src/components/style.css';
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 const Dashboard = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch products from the FastAPI endpoint
@@ -37,10 +45,10 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8 text-purple-700">Food Inventory</h1>
+     
 
       {/* Fridge container */}
-      <div className="bg-[#F1F0FB] rounded-2xl p-8 shadow-xl border-4 border-[#8E9196]">
+      <div className="">
         <div className="space-y-8">
           {/* 3D Fridge Model */}
           <div className="wrapper">
@@ -48,50 +56,66 @@ const Dashboard = () => {
               id="left-door"
               className="door"
             >
+              <div className="door-knob">
+
+              </div>
               {/* Left door content */}
             </div>
             <div
               id="right-door"
               className="door"
             >
+               <div className="door-knob">
+                
+                </div>
               {/* Right door content */}
             </div>
-
+            <div className="hardcoded-line"></div> 
+            <div className="hardcoded-line1"></div> 
+            <div className="hardcoded-line2"></div> 
+            <div className="hardcoded-line3"></div>
+            <div className="rectangle"></div>
+            <div className="rectangle2"></div>
             {/* Shelves container inside the fridge */}
             <div className="shelves-container">
-              <div className="shelf">
-                {shelves[0]?.map((product) => (
-                  <Card
-                    key={product.id}
-                    className="product"
-                    onClick={() => setSelectedProduct(product)}
-                  >
-                    <img
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                    />
-                    <h3 className="text-sm text-purple-700">{product.name}</h3>
-                  </Card>
-                ))}
+  <TooltipProvider>
+    {shelves.map((shelf, shelfIndex) => (
+      <div key={shelfIndex} className="shelf">
+        {shelf.map((item) => (
+          <Tooltip key={item.id}>
+            <TooltipTrigger asChild>
+              <div className="product">
+                <img
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
+                  className="rounded-lg"
+                />
               </div>
-              <div className="shelf">
-                {shelves[1]?.map((product) => (
-                  <Card
-                    key={product.id}
-                    className="product"
-                    onClick={() => setSelectedProduct(product)}
-                  >
-                    <img
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                    />
-                    <h3 className="text-sm text-purple-700">{product.name}</h3>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="font-semibold">{item.name}</p>
+              <p>Expires: {item.expirationDate}</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+    ))}
+  </TooltipProvider>
+</div>
+
           </div>
         </div>
+      </div>
+
+      {/* Recipes button positioned at bottom right */}
+      <div className="fixed bottom-6 right-6">
+        <Button 
+          onClick={() => navigate('/recipes')} 
+          className="bg-primary hover:bg-primary/90 text-white"
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          Recipes
+        </Button>
       </div>
 
       <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
@@ -99,13 +123,13 @@ const Dashboard = () => {
           {selectedProduct && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-purple-700">{selectedProduct.title}</DialogTitle>
+                <DialogTitle className="text-purple-700">{selectedProduct.name}</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="aspect-square relative overflow-hidden rounded-lg">
                   <img
                     src={selectedProduct.image || "/placeholder.svg"}
-                    alt={selectedProduct.title}
+                    alt={selectedProduct.name}
                     className="object-cover w-full h-full"
                   />
                 </div>
@@ -113,17 +137,12 @@ const Dashboard = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="font-semibold flex items-center gap-2 text-purple-700">
-                        <ShoppingBag className="w-4 h-4" />
-                        Quantity
-                      </h4>
-                      <p className="text-purple-600">{selectedProduct.quantity}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold flex items-center gap-2 text-purple-700">
                         <Calendar className="w-4 h-4" />
                         Expiration
                       </h4>
-                      <p className="text-purple-600">{format(new Date(selectedProduct.expirationDate), "MMM d, yyyy")}</p>
+                      <p className="text-purple-600">
+                        {selectedProduct.expirationDate}
+                      </p>
                     </div>
                   </div>
                 </div>
