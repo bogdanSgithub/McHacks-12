@@ -56,6 +56,6 @@ def cook_recipe(info):
             if item["id"] == key:
                 available_quantity = extract_quantity(item["weight"])
                 if available_quantity <= value:
-                    requests.delete(f"http://localhost:8000/items/{item["id"]}")
+                    requests.delete(f"http://localhost:8000/items/{item['id']}")
                 else:
-                    response = requests.put(f"http://localhost:8000/items/{item["id"]}", json={"weight": f"{available_quantity - value} {item['weight'].split()[1]}"})
+                    response = requests.put(f"http://localhost:8000/items/{item['id']}", json={"weight": f"{available_quantity - value} {item['weight'].split()[1]}"})
