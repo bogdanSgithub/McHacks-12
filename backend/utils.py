@@ -3,12 +3,14 @@ import imutils
 import numpy as np
 import pytesseract
 from imutils.perspective import four_point_transform
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
+from concurrent.futures import ThreadPoolExecutor
+import time
 import json
 import re
 from openai import OpenAI
@@ -16,6 +18,8 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
 import platform
+import asyncio
+
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
@@ -27,7 +31,13 @@ if api_key:
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-def perform_ocr(img: np.ndarray):
+executor = ThreadPoolExecutor()
+
+async def get_product_info(product):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, get_product_info_sync, product)
+
+async def perform_ocr(img: np.ndarray):
     img_orig = cv2.imdecode(img, cv2.IMREAD_COLOR)
     image = img_orig.copy()
     image = imutils.resize(image, width=500)
@@ -112,16 +122,8 @@ def perform_ocr(img: np.ndarray):
         }
         products.append(product)
 
-    for product in products:
-        product = get_product_info(product)
-    #final_products = []
-    #for product in products:
-    #    quantity = product.pop("quantity")
-    #    for _ in range(quantity):
-    #        final_products.append(product)
-    #    
-    #print(final_products)
-    return json.dumps(products, indent=4)
+    products = await asyncio.gather(*[get_product_info(product) for product in products])
+    return products
 
 def get_expiration_date(name, bought_date):
     if client is None:
@@ -137,10 +139,8 @@ def get_expiration_date(name, bought_date):
     )
     return completion.choices[0].message.content
 
-
-def get_product_info(product):
+def get_product_info_sync(product):
     url = f'https://www.maxi.ca/fr/search?search-bar={product["product_code"]}'
-    #class_name = "chakra-linkbox__overlay css-1hnz6hu"
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
@@ -157,10 +157,12 @@ def get_product_info(product):
     driver = webdriver.Chrome(options=chrome_options)
     try:
         driver.get(url)
-        time.sleep(5)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-heading.css-6qrhwc")))
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-text.css-1ecdp9w")))
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-image.css-oguq8l")))
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-text.css-1yftjin")))
 
-
-        
         error_element = driver.find_elements(By.CSS_SELECTOR, f".{'chakra-heading css-59w6mg'.replace(' ', '.')}")
         error_text = error_element[0].get_attribute("innerText") if error_element else ""
 
@@ -176,8 +178,7 @@ def get_product_info(product):
 
     except Exception as e:
         print(e)
-        print() 
-
+    return product
 
 #img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
 
