@@ -60,39 +60,29 @@ const AddProduct = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-
+  
       const response = await fetch("http://127.0.0.1:8000/ocr/", {
         method: "POST",
         body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to process receipt");
       }
-
+  
       const data = await response.json();
-      //console.log(data);
-
-      if (typeof data.result === "string") {
-        try {
-          const parsedResult = JSON.parse(data.result); // Parse the JSON string into an array
-          if (Array.isArray(parsedResult)) {
-            // Directly map the parsed data to include existing fields like "name"
-            const itemsWithNames = parsedResult.map((item) => ({
-              ...item, // Preserve all existing fields, including "name"
-            }));
-            setItems(itemsWithNames);
-            toast.success("Receipt processed successfully!");
-          } else {
-            setItems([]);
-            throw new Error("Invalid data format: result is not an array");
-          }
-        } catch (parseError) {
-          throw new Error("Error parsing result JSON: " + parseError.message);
-        }
+      console.log(data);
+  
+      // Directly handle `result` as an array
+      if (Array.isArray(data.result)) {
+        const itemsWithNames = data.result.map((item) => ({
+          ...item,
+        }));
+        setItems(itemsWithNames);
+        toast.success("Receipt processed successfully!");
       } else {
         setItems([]);
-        throw new Error("Invalid data format: result is not a string");
+        throw new Error("Invalid data format: result is not an array");
       }
     } catch (error) {
       toast.error("Failed to process receipt. Please try again.");
@@ -101,6 +91,7 @@ const AddProduct = () => {
       setIsProcessing(false);
     }
   };
+  
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -146,10 +137,11 @@ const AddProduct = () => {
       name: item.name,
       weight: item.weight,
       expiration_date: "2025-01-01", // Placeholder, you can replace this with actual logic
+      image: item.image,  
     }));
   
     console.log("Transformed items:", transformedItems);
-  
+    console.log(items);
     try {
       // Assuming you only want to send the first item
       const response = await fetch("http://127.0.0.1:8000/additems/", {
@@ -157,7 +149,7 @@ const AddProduct = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(transformedItems[0]), // Send just the first item (or the item you're trying to save)
+        body: JSON.stringify(transformedItems), // Send just the first item (or the item you're trying to save)
       });
   
       if (!response.ok) {
@@ -165,6 +157,7 @@ const AddProduct = () => {
       }
   
       const result = await response.json();
+
       toast.success("Order saved successfully!");
       console.log("Saved order:", result);
   
