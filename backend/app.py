@@ -3,7 +3,7 @@ from fastapi import FastAPI, UploadFile, APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from ocr_scraping import perform_ocr
-from recipe import get_recipes
+from recipe import get_recipes, cook_recipe
 from routes import routes
 
 app = FastAPI()
@@ -37,3 +37,7 @@ async def ocr_receipt(file: UploadFile):
 @app.post("/recipe/")
 async def recipes():
     return get_recipes()
+
+@app.post("/cook_recipe")
+async def cooking(recipe: str):
+    return cook_recipe(recipe)
