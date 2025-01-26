@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class ItemCreate(BaseModel):
     name: str
-    weight: int
+    weight: str
     expiration_date: str
 
 class ItemResponse(ItemCreate):
