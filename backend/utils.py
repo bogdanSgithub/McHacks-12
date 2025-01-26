@@ -11,6 +11,17 @@ import time
 
 import json
 import re
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+from datetime import datetime, timedelta
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
+client = None
+
+if api_key:
+    client = OpenAI(api_key=api_key)
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -110,6 +121,20 @@ def perform_ocr(img: np.ndarray):
     #print(final_products)
     return json.dumps(products, indent=4)
 
+def get_expiration_date(name, bought_date):
+    if client is None:
+        new_date = datetime.strptime(bought_date, "%y/%m/%d") + timedelta(weeks=3)
+        return new_date.strftime("%y/%m/%d")
+    bought_date = datetime.strptime(bought_date, "%y/%m/%d")
+    completion = client.chat.completions.create(
+    model="gpt-4",
+    store=True,
+    messages=[
+        {"role": "user", "content": f"Only give me the date. Only that. Only return datetime. Not always 1 month later. Provide the expiration date of this product {name} which was bought on {bought_date}."},
+    ]
+    )
+    return completion.choices[0].message.content
+
 
 def get_product_info(product):
     url = f"https://www.maxi.ca/fr/search?search-bar={product["product_code"]}"
@@ -130,15 +155,22 @@ def get_product_info(product):
     driver = webdriver.Chrome(options=chrome_options)
     try:
         driver.get(url)
-        time.sleep(4)
+        time.sleep(5)
+        error_element = driver.find_elements(By.CSS_SELECTOR, f".{'chakra-heading css-59w6mg'.replace(' ', '.')}")
+        error_text = error_element[0].get_attribute("innerText") if error_element else ""
 
+        if "unable" in error_text:
+            print("fack for " + product["product_code"])
+            return product
         product["name"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-heading css-6qrhwc".replace(' ', '.')}").get_attribute("innerText")
         product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1ecdp9w".replace(' ', '.')}").get_attribute("innerText")
         product["image"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-image css-oguq8l".replace(' ', '.')}").get_attribute("src")
         product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1yftjin".replace(' ', '.')}").get_attribute("innerText")
+        product["expiration_date"] = get_expiration_date(product["name"], product["date_bought"])
 
     except Exception as e:
-        pass
+        print(e)
+        print() 
 
 
 #img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
