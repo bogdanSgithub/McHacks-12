@@ -168,17 +168,3 @@ def get_product_info(product):
     product["image"] = image_element.get_attribute("src")
     product["weight"] = weight_element.get_attribute("innerText")
     product["expiration_date"] = get_expiration_date(product["name"], product["date_bought"])
-
-#img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
-
-#img_path = r"C:\Users\Bogdan\Downloads\receipt_1.jpg"
-'''
-img = cv2.imread(img_path)
-
-if img is None:
-    print("Error loading image!")
-else:
-    _, img_encoded = cv2.imencode('.jpg', img)  # Encode to JPG format
-    img_bytes = img_encoded.tobytes()  # Convert to byte buffer
-    perform_ocr(np.frombuffer(img_bytes, dtype=np.uint8))  # Ensure it's a NumPy array
-'''
