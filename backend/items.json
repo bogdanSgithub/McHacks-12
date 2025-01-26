@@ -1,0 +1,65 @@
+[
+    {
+      "weight": "4 l, 0,20 $/100ml",
+      "image": "https://assets.shop.loblaws.ca/products/20021564/b3/fr/front/20021564_front_a06_@2.png",
+      "expiration_date": "2025-01-01",
+      "id": 1,
+      "name": "Lait 2 %"
+    },
+    {
+      "weight": "454 g, 1,76 $/100g",
+      "image": "https://assets.shop.loblaws.ca/products/20296112003/b3/fr/front/20296112003_front_a06_@2.png",
+      "expiration_date": "2025-01-01",
+      "id": 2,
+      "name": "Beurre Demi-Sel"
+    },
+    {
+      "weight": "4.54 kg, 0,15 $/100g",
+      "image": "https://assets.shop.loblaws.ca/products/20601017001/b3/fr/front/20601017001_front_a06_@2.png",
+      "expiration_date": "2025-01-01",
+      "id": 3,
+      "name": "Pommes de terre jaunes, sac de 10 lb"
+    },
+    {
+      "weight": "4,28 $/1kg 1,94 $/1lb",
+      "image": "https://assets.shop.loblaws.ca/products/20969893/b1/fr/front/20969893_front_a01_@2.png",
+      "expiration_date": "2025-01-01",
+      "id": 4,
+      "name": "Poulet entier refroidi à l’air, en sac"
+    },
+    {
+      "weight": "454 g, 1,76 $/100g",
+      "image": "https://assets.shop.loblaws.ca/products/20296112003/b3/fr/front/20296112003_front_a06_@2.png",
+      "expiration_date": "2025-01-01",
+      "id": 8,
+      "name": "Beurre Demi-Sel"
+    },
+    {
+        "weight": "365 ml, 1,31 $/100ml",
+        "image": "https://assets.shop.loblaws.ca/products/21591713/b3/fr/front/21591713_front_a06_@2.png",
+        "expiration_date": "2025-01-01",
+        "id": 5,
+        "name": "Tartinade de fruits fraise"
+      },
+      {
+        "weight": "500 g, 1,00 $/100g",
+        "image": "https://assets.shop.loblaws.ca/products/20298178/b3/fr/front/20298178_front_a06_@2.png",
+        "expiration_date": "2025-01-01",
+        "id": 6,
+        "name": "Beurre d’arachide crémeux biologique"
+      },
+      {
+        "weight": "675 g, 0,51 $/100g",
+        "image": "https://assets.shop.loblaws.ca/products/20322326/b3/fr/front/20322326_front_a06_@2.png",
+        "expiration_date": "2025-01-01",
+        "id": 7,
+        "name": "Pain à tranches épaisses à 100 % de blé entier"
+      },
+    {
+      "weight": "4.54 kg, 0,15 $/100g",
+      "image": "https://assets.shop.loblaws.ca/products/20601017001/b3/fr/front/20601017001_front_a06_@2.png",
+      "expiration_date": "2025-01-01",
+      "id": 9,
+      "name": "Pommes de terre jaunes, sac de 10 lb"
+    }
+  ]
