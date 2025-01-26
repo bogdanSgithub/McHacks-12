@@ -15,6 +15,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
+import platform
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
@@ -23,7 +24,8 @@ client = None
 if api_key:
     client = OpenAI(api_key=api_key)
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def perform_ocr(img: np.ndarray):
     img_orig = cv2.imdecode(img, cv2.IMREAD_COLOR)
