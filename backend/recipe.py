@@ -16,15 +16,20 @@ if api_key:
 
 
 def get_items():
+
     response = requests.get("http://localhost:8000/items/")
+    print(response.json())
     response.raise_for_status()
     return response.json()
 
 def get_recipes():
-    items = get_items()
-    #with open('items.json', 'r') as file:
-    #    items = json.load(file)  
-
+    with open('good_saved.json', 'r') as file:
+        recipes = json.load(file)
+    return recipes
+    #items = get_items()
+    with open('items.json', 'r') as file:
+        items = json.load(file)  
+    print(items)
     if client is None:
         return ""
     completion = client.chat.completions.create(
@@ -49,9 +54,9 @@ def extract_quantity(value):
     return None
 
 def cook_recipe(info):
-    items = get_items()
-    #with open('items.json', 'r') as file:
-    #    items = json.load(file)
+    #items = get_items()
+    with open('items.json', 'r') as file:
+        items = json.load(file)
     if client is None:
         return ""
     print(info)
@@ -64,7 +69,7 @@ def cook_recipe(info):
                 available_quantity = extract_quantity(item["weight"])
                 if available_quantity <= value:
                     print(f"Deleting item {key}")
-                    requests.delete(f"http://localhost:8000/items/{item["id"]}")
+                    requests.delete(f"http://localhost:8000/items/{item['id']}")
                 else:
                     print(f"reducing item {key}")
-                    response = requests.put(f"http://localhost:8000/items/{item["id"]}", json={"weight": f"{available_quantity - value} {item['weight'].split()[1]}"})
+                    response = requests.put(f"http://localhost:8000/items/{item['id']}", json={"weight": f"{available_quantity - value} {item['weight'].split()[1]}"})

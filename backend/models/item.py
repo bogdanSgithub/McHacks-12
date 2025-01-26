@@ -10,3 +10,4 @@ class Item(Base):
     weight = Column(String)
     expiration_date = Column(String)  
     image = Column(String)
+    brand = Column(String)

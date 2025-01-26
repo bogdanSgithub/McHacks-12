@@ -16,7 +16,7 @@ create_db()
 async def add_items(items: List[ItemCreate], db: Session = Depends(get_db)):
     db_items = []
     for item in items:
-        db_item = Item(name=item.name, weight=item.weight, expiration_date=item.expiration_date, image=item.image)
+        db_item = Item(name=item.name, weight=item.weight, expiration_date=item.expiration_date, image=item.image, brand=item.brand)
         db.add(db_item)
         db.commit()
         db.refresh(db_item)

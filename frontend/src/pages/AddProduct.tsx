@@ -105,8 +105,9 @@ const AddProduct = () => {
     const transformedItems = items.map((item) => ({
       name: item.name,
       weight: item.weight,
-      expiration_date: item.expirationDate,
+      expiration_date: item.expiration_date,
       image: item.image,
+      brand: item.brand,
     }));
 
     console.log("Transformed items:", transformedItems);

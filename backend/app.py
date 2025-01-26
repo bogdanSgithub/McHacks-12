@@ -36,6 +36,7 @@ async def ocr_receipt(file: UploadFile):
 
 @app.post("/recipe/")
 async def recipes():
+    print("Getting recipes")
     return get_recipes()
 
 @app.post("/cook_recipe")

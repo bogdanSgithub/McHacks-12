@@ -7,6 +7,7 @@ class ItemCreate(BaseModel):
     weight: str
     expiration_date: str
     image: str
+    brand: str
 
 class ItemResponse(ItemCreate):
     id: int

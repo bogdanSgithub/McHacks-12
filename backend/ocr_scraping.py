@@ -131,7 +131,7 @@ def get_expiration_date(name, bought_date):
     model="gpt-4",
     store=True,
     messages=[
-        {"role": "user", "content": f"Only give me the date. Only that. Only return datetime. Not always 1 month later. Provide the expiration date of this product {name} which was bought on {bought_date}."},
+        {"role": "user", "content": f"Only give me the date. Only that. Only return datetime in format %y/%m/%d. Not always 1 month later. Provide the expiration date of this product {name} which was bought on {bought_date}."},
     ]
     )
     return completion.choices[0].message.content

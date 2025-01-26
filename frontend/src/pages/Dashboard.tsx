@@ -4,15 +4,16 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Calendar } from "lucide-react";
+import { BookOpen, Calendar, Weight, Clock, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import '/src/components/style.css';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import '/src/components/style.css';
+
 const Dashboard = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<typeof products[0] | null>(null);
@@ -43,31 +44,21 @@ const Dashboard = () => {
     return acc;
   }, []);
 
-  return (
-    <div className="container mx-auto p-6">
-     
+  
 
+  return (
+    <div className="container mx-auto p-6 relative min-h-screen">
       {/* Fridge container */}
       <div className="">
         <div className="space-y-8">
           {/* 3D Fridge Model */}
           <div className="wrapper">
-            <div
-              id="left-door"
-              className="door"
-            >
-              <div className="door-knob">
-
-              </div>
+            <div id="left-door" className="door">
+              <div className="door-knob"></div>
               {/* Left door content */}
             </div>
-            <div
-              id="right-door"
-              className="door"
-            >
-               <div className="door-knob">
-                
-                </div>
+            <div id="right-door" className="door">
+              <div className="door-knob"></div>
               {/* Right door content */}
             </div>
             <div className="hardcoded-line"></div> 
@@ -78,31 +69,32 @@ const Dashboard = () => {
             <div className="rectangle2"></div>
             {/* Shelves container inside the fridge */}
             <div className="shelves-container">
-  <TooltipProvider>
-    {shelves.map((shelf, shelfIndex) => (
-      <div key={shelfIndex} className="shelf">
-        {shelf.map((item) => (
-          <Tooltip key={item.id}>
-            <TooltipTrigger asChild>
-              <div className="product">
-                <img
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.name}
-                  className="rounded-lg"
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="font-semibold">{item.name}</p>
-              <p>Expires: {item.expirationDate}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </div>
-    ))}
-  </TooltipProvider>
-</div>
-
+              <TooltipProvider>
+                {shelves.map((shelf, shelfIndex) => (
+                  <div key={shelfIndex} className="shelf">
+                    {shelf.map((product) => (
+                      <Tooltip key={product.id}>
+                        <TooltipTrigger asChild>
+                          <Card
+                            className="product"
+                            onClick={() => setSelectedProduct(product)}
+                          >
+                            <img
+                              src={product.image || "/placeholder.svg"}
+                              alt={product.name}
+                            />
+                          </Card>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="font-semibold">{product.name}</p>
+                          <p>Expires: {product.expiration_date}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                ))}
+              </TooltipProvider>
+            </div>
           </div>
         </div>
       </div>
@@ -123,7 +115,9 @@ const Dashboard = () => {
           {selectedProduct && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-purple-700">{selectedProduct.name}</DialogTitle>
+                <DialogTitle className="text-2xl font-bold text-purple-700">
+                  {selectedProduct.name}
+                </DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="aspect-square relative overflow-hidden rounded-lg">
@@ -134,14 +128,32 @@ const Dashboard = () => {
                   />
                 </div>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <h4 className="font-semibold flex items-center gap-2 text-purple-700">
+                        <Tag className="w-4 h-4" />
+                        Brand
+                      </h4>
+                      <p className="text-purple-600">
+                        {selectedProduct.brand || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold flex items-center gap-2 text-purple-700">
+                        <Weight className="w-4 h-4" />
+                        Weight
+                      </h4>
+                      <p className="text-purple-600">
+                        {selectedProduct.weight.split(",")[0] || "N/A"}
+                      </p>
+                    </div>
                     <div>
                       <h4 className="font-semibold flex items-center gap-2 text-purple-700">
                         <Calendar className="w-4 h-4" />
-                        Expiration
+                        Expiration Date
                       </h4>
                       <p className="text-purple-600">
-                        {selectedProduct.expirationDate}
+                        {selectedProduct.expiration_date}
                       </p>
                     </div>
                   </div>

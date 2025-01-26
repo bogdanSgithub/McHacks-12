@@ -1,0 +1,10 @@
+[
+  {
+    "recipe": "Recipe 1: Baked Chicken with Potatoes \n\nIngredients:\n1. Whole Air Chilled Chicken (1 kg)\n2. Half-salted Butter (100 g)\n3. Yellow Potatoes (2 kg)\n\nInstructions:\n1. Preheat your oven to 200°C (400°F).\n2. Wash the chicken inside and out. Pat it dry with paper towels.\n3. Rub the butter over the chicken and season it with salt and pepper.\n4. Peel the potatoes and cut them into chunks.\n5. Place the chicken in a roasting pan and surround it with the potatoes.\n6. Roast in the oven for about 1 hour and 30 minutes, until the chicken is golden brown and the juices run clear when a skewer is inserted into the thickest part of the thigh. The potatoes should be tender.\n7. Serve the chicken with the roasted potatoes.\n\nRecipe 2: Strawberry and Peanut Butter Sandwich\n\nIngredients:\n1. Whole Wheat Thick Sliced Bread (200 g)\n2. Organic Creamy Peanut Butter (100 g)\n3. Strawberry Fruit Spread\t(100 ml)\n\nInstructions:\n1. Spread the peanut butter evenly on one slice of bread.\n2. Spread the strawberry fruit spread on another slice.\n3. Press the two slices together to form a sandwich.\n4. Repeat the process with the remaining slices of bread and fillings.\n5. Serve immediately or pack for later.\n\n ",
+    "dct": " {(4, '1 kg'), (2, '100 g'), (3, '2 kg')} "
+  },
+  {
+    "recipe": " Baked Chicken with Potatoes ",
+    "dct": " {(7, '200 g'), (6, '100 g'), (5, '100 ml')} "
+  }
+]
