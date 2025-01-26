@@ -23,7 +23,7 @@ client = None
 if api_key:
     client = OpenAI(api_key=api_key)
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def perform_ocr(img: np.ndarray):
     img_orig = cv2.imdecode(img, cv2.IMREAD_COLOR)
@@ -137,7 +137,7 @@ def get_expiration_date(name, bought_date):
 
 
 def get_product_info(product):
-    url = f"https://www.maxi.ca/fr/search?search-bar={product["product_code"]}"
+    url = f'https://www.maxi.ca/fr/search?search-bar={product["product_code"]}'
     #class_name = "chakra-linkbox__overlay css-1hnz6hu"
 
     chrome_options = Options()
@@ -156,17 +156,21 @@ def get_product_info(product):
     try:
         driver.get(url)
         time.sleep(5)
+
+
+        
         error_element = driver.find_elements(By.CSS_SELECTOR, f".{'chakra-heading css-59w6mg'.replace(' ', '.')}")
         error_text = error_element[0].get_attribute("innerText") if error_element else ""
 
         if "unable" in error_text:
             print("fack for " + product["product_code"])
             return product
-        product["name"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-heading css-6qrhwc".replace(' ', '.')}").get_attribute("innerText")
-        product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1ecdp9w".replace(' ', '.')}").get_attribute("innerText")
-        product["image"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-image css-oguq8l".replace(' ', '.')}").get_attribute("src")
-        product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1yftjin".replace(' ', '.')}").get_attribute("innerText")
+        product["name"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-heading css-6qrhwc'.replace(' ', '.')}").get_attribute("innerText")
+        product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-text css-1ecdp9w'.replace(' ', '.')}").get_attribute("innerText")
+        product["image"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-image css-oguq8l'.replace(' ', '.')}").get_attribute("src")
+        product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-text css-1yftjin'.replace(' ', '.')}").get_attribute("innerText")
         product["expiration_date"] = get_expiration_date(product["name"], product["date_bought"])
+
 
     except Exception as e:
         print(e)

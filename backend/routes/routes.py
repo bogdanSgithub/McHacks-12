@@ -12,7 +12,7 @@ create_db()
 
 # Dependency to get the database session
 
-@router.post("/items/", response_model=ItemResponse)
+@router.post("/additems/", response_model=ItemResponse)
 async def add_item(item: ItemCreate, db: Session = Depends(get_db)):
     db_item = Item(name=item.name, weight=item.weight, expiration_date=item.expiration_date)
     db.add(db_item)
