@@ -12,7 +12,7 @@ import time
 import json
 import re
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def perform_ocr(img: np.ndarray):
     img_orig = cv2.imdecode(img, cv2.IMREAD_COLOR)
@@ -112,7 +112,7 @@ def perform_ocr(img: np.ndarray):
 
 
 def get_product_info(product):
-    url = f"https://www.maxi.ca/fr/search?search-bar={product["product_code"]}"
+    url = f'https://www.maxi.ca/fr/search?search-bar={product["product_code"]}'
     #class_name = "chakra-linkbox__overlay css-1hnz6hu"
 
     chrome_options = Options()
@@ -130,12 +130,12 @@ def get_product_info(product):
     driver = webdriver.Chrome(options=chrome_options)
     try:
         driver.get(url)
-        time.sleep(4)
+        time.sleep(5)
 
-        product["name"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-heading css-6qrhwc".replace(' ', '.')}").get_attribute("innerText")
-        product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1ecdp9w".replace(' ', '.')}").get_attribute("innerText")
-        product["image"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-image css-oguq8l".replace(' ', '.')}").get_attribute("src")
-        product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{"chakra-text css-1yftjin".replace(' ', '.')}").get_attribute("innerText")
+        product["name"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-heading css-6qrhwc'.replace(' ', '.')}").get_attribute("innerText")
+        product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-text css-1ecdp9w'.replace(' ', '.')}").get_attribute("innerText")
+        product["image"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-image css-oguq8l'.replace(' ', '.')}").get_attribute("src")
+        product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-text css-1yftjin'.replace(' ', '.')}").get_attribute("innerText")
 
     except Exception as e:
         pass
