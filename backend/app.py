@@ -29,7 +29,7 @@ async def ocr_receipt(file: UploadFile):
         image_bytes = await file.read()
         img_array = np.frombuffer(image_bytes, np.uint8)
 
-        ocr_text = await perform_ocr(img_array)
+        ocr_text = perform_ocr(img_array)
         return JSONResponse(content={"result": ocr_text}, status_code=200)
     else:
         return {"error": "Uploaded file is not an image"}

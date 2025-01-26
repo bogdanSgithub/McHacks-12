@@ -8,8 +8,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-from concurrent.futures import ThreadPoolExecutor
 import time
 import json
 import re
@@ -18,7 +16,6 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
 import platform
-import asyncio
 
 load_dotenv()
 
@@ -31,13 +28,8 @@ if api_key:
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-executor = ThreadPoolExecutor()
 
-async def get_product_info(product):
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(executor, get_product_info_sync, product)
-
-async def perform_ocr(img: np.ndarray):
+def perform_ocr(img: np.ndarray):
     img_orig = cv2.imdecode(img, cv2.IMREAD_COLOR)
     image = img_orig.copy()
     image = imutils.resize(image, width=500)
@@ -98,31 +90,36 @@ async def perform_ocr(img: np.ndarray):
     text = pytesseract.image_to_string(
         cv2.cvtColor(receipt, cv2.COLOR_BGR2RGB), config=options
     )    
-    pattern = r'(?<!\d)(?:\((\d+)\))?\s*(\d{11})(?=\s)'
+    pattern = r'(?<!\d)(?:\((\d+)\))?\s*(\d{11})\s'
 
     # Find all matches for product codes and quantities
     matches = re.findall(pattern, text)
+    print(text)
 
     date_pattern = r'\s\d{2}/\d{2}/\d{2}\s'
     date_match = re.search(date_pattern, text)
     date_bought = date_match.group().strip() if date_match else None
 
     products = []
+    print(f"matches {matches}")
     for match in matches:
         if match[0] == "":
             quantity = 1
         else:
             quantity = int(match[0])
         product_code = match[1]
-
+        
         product = {
             "product_code": product_code,
             "quantity": quantity,
             "date_bought": date_bought
         }
         products.append(product)
+    print(f"products {products}")
 
-    products = await asyncio.gather(*[get_product_info(product) for product in products])
+    for product in products:
+        get_product_info(product)
+    print(f"final products {products}")
     return products
 
 def get_expiration_date(name, bought_date):
@@ -139,13 +136,15 @@ def get_expiration_date(name, bought_date):
     )
     return completion.choices[0].message.content
 
-def get_product_info_sync(product):
+def get_product_info(product):
     url = f'https://www.maxi.ca/fr/search?search-bar={product["product_code"]}'
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-webgl")
+    chrome_options.add_argument("--enable-unsafe-swiftshader")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Disable Selenium detection
@@ -155,30 +154,20 @@ def get_product_info_sync(product):
     )
     # Start the WebDriver
     driver = webdriver.Chrome(options=chrome_options)
-    try:
-        driver.get(url)
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-heading.css-6qrhwc")))
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-text.css-1ecdp9w")))
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-image.css-oguq8l")))
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-text.css-1yftjin")))
+    driver.get(url)
+    time.sleep(4)
+    wait = WebDriverWait(driver, 10)
 
-        error_element = driver.find_elements(By.CSS_SELECTOR, f".{'chakra-heading css-59w6mg'.replace(' ', '.')}")
-        error_text = error_element[0].get_attribute("innerText") if error_element else ""
+    name_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-heading.css-6qrhwc")))
+    brand_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-text.css-1ecdp9w")))
+    image_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-image.css-oguq8l")))
+    weight_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".chakra-text.css-1yftjin")))
 
-        if "unable" in error_text:
-            print("fack for " + product["product_code"])
-            return product
-        product["name"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-heading css-6qrhwc'.replace(' ', '.')}").get_attribute("innerText")
-        product["brand"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-text css-1ecdp9w'.replace(' ', '.')}").get_attribute("innerText")
-        product["image"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-image css-oguq8l'.replace(' ', '.')}").get_attribute("src")
-        product["weight"] = driver.find_element(By.CSS_SELECTOR, f".{'chakra-text css-1yftjin'.replace(' ', '.')}").get_attribute("innerText")
-        product["expiration_date"] = get_expiration_date(product["name"], product["date_bought"])
-
-
-    except Exception as e:
-        print(e)
-    return product
+    product["name"] = name_element.get_attribute("innerText")
+    product["brand"] = brand_element.get_attribute("innerText")
+    product["image"] = image_element.get_attribute("src")
+    product["weight"] = weight_element.get_attribute("innerText")
+    product["expiration_date"] = get_expiration_date(product["name"], product["date_bought"])
 
 #img_path = r"C:\Users\Bogdan\Downloads\maxi_0.jpg"
 
