@@ -1,6 +1,3 @@
-Submitted to McHacks 12
-Devpost: https://devpost.com/software/myfridge-ylbriu
-
 # Inspiration
 MyFridge was inspired by the need to minimize food waste. We wanted to create an app to help users track their food inventory, manage expiry dates, and suggest recipes based on what they have in their fridge.
 
